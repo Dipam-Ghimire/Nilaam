@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Brand */
+  --color-primary: #14532d;
+  --color-primary-hover: #166534;
+  --color-primary-deep: #003b1b;
+  --color-sage: #dcfce7;
+  --color-sage-light: #f0fdf4;
+
+  /* Surfaces */
+  --color-canvas: #f8fafc;
+  --color-lavender: #f2f3ff;
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
+
+  /* Text */
+  --color-ink: #0f172a;
+  --color-ink-2: #334155;
+  --color-ink-3: #64748b;
+
+  /* Status (urgency colors are reserved for time-sensitive events) */
+  --color-success: #16a34a;
+  --color-warn: #ea580c;
+  --color-warn-soft: #ffedd5;
+  --color-danger: #dc2626;
+  --color-danger-soft: #fee2e2;
+
+  /* Elevation levels 1 to 3 */
+  --shadow-card: 0 1px 3px 0 rgb(15 23 42 / 0.04), 0 4px 12px 0 rgb(15 23 42 / 0.03);
+  --shadow-card-hover: 0 4px 6px -1px rgb(15 23 42 / 0.05), 0 12px 24px -4px rgb(20 83 45 / 0.08);
+  --shadow-overlay: 0 20px 25px -5px rgb(15 23 42 / 0.08), 0 8px 10px -6px rgb(15 23 42 / 0.04);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  letter-spacing: -0.005em;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.02em;
+}
+
+/* Pulsing dot used by "Live Now" badges */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-success);
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
