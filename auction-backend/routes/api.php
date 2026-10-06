@@ -11,6 +11,7 @@ use App\Http\Controllers\KycController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\NotificationController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-orders', [OrderController::class, 'myOrders']);
@@ -20,6 +21,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/payment/verify', [PaymentController::class, 'verify']);
     Route::post('/orders/{id}/confirm-receipt', [PaymentController::class, 'confirmReceipt']);
     Route::post('/orders/{id}/release-escrow', [AdminController::class, 'releaseEscrow']);
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 });
 
 Route::get('/marketplace-stats', [AdminController::class, 'marketplaceStats']);Route::get('/my-stats', [StatsController::class, 'mine'])->middleware('auth:sanctum');

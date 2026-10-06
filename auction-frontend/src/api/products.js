@@ -8,9 +8,11 @@ export const createProduct = (data) => {
   });
 };
 
-export const getProducts = () => {
-  return api.get('/products');
-};
+export function getProducts(params = {}) {
+  return api.get('/products', {
+    params,
+  });
+}
 
 export const getMyProducts = () => {
   return api.get('/my-products');

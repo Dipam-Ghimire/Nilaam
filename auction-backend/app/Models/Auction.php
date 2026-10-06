@@ -30,6 +30,7 @@ class Auction extends Model
     {
         return $this->hasMany(Bid::class, 'auction_id');
     }
+
     public function order()
     {
         return $this->hasOne(Order::class);

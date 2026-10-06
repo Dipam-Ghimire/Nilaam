@@ -9,6 +9,27 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        $validated = $request->validate([
+        'search' => ['nullable', 'string', 'max:100'],
+    ]);
+
+    $search = trim($validated['search'] ?? '');
+
+    $query = Product::query()
+        ->with(['images', 'user']);
+
+    if ($search !== '') {
+        $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', '%' . $search . '%')
+              ->orWhere('description', 'like', '%' . $search . '%')
+              ->orWhere('category', 'like', '%' . $search . '%')
+              ->orWhere('city', 'like', '%' . $search . '%');
+        });
+    }
+
+    return response()->json(
+        $query->latest()->get()
+    );
         return response()->json(
             Product::with('images')
                 ->where('status', 'approved')

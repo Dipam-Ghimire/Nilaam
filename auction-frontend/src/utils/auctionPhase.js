@@ -3,91 +3,142 @@
 export function getTimeValue(value) {
   if (!value) return null;
 
-  const time = new Date(value).getTime();
+  let dateValue = value;
+
+  /*
+   * Laravel should now return ISO UTC timestamps such as:
+   *
+   * 2026-10-02T04:08:00.000Z
+   *
+   * If an old response happens to return a datetime without
+   * timezone information, treat it as UTC rather than letting
+   * the browser guess.
+   */
+  if (
+    typeof dateValue === "string" &&
+    !dateValue.endsWith("Z") &&
+    !/[+-]\d{2}:\d{2}$/.test(dateValue)
+  ) {
+    dateValue = `${dateValue}Z`;
+  }
+
+  const time = new Date(dateValue).getTime();
 
   return Number.isNaN(time) ? null : time;
 }
 
 /**
- * Determines the real auction phase from time.
+ * Determines the real auction phase.
  *
+ * pending = start time has not arrived
+ * active  = start time arrived but end time has not arrived
  * closed  = end time has passed
- * pending = start time is in the future
- * active  = currently running
  */
-export function getAuctionPhase(auction, now = Date.now()) {
-  if (!auction) return 'unknown';
-
-  const startTime = getTimeValue(auction.start_time);
-  const endTime = getTimeValue(auction.end_time);
-
-  // Time always wins for an auction that has actually ended.
-  if (endTime !== null && endTime <= now) {
-    return 'closed';
+export function getAuctionPhase(
+  auction,
+  now = Date.now()
+) {
+  if (!auction) {
+    return "unknown";
   }
 
-  // Upcoming auction.
-  if (startTime !== null && startTime > now) {
-    return 'pending';
-  }
+  const startTime = getTimeValue(
+    auction.start_time
+  );
 
-  // Respect explicit backend closed states.
-  const backendStatus = String(auction.status || '').toLowerCase();
+  const endTime = getTimeValue(
+    auction.end_time
+  );
 
+  /*
+   * Invalid time data.
+   */
   if (
-    backendStatus === 'closed' ||
-    backendStatus === 'completed' ||
-    backendStatus === 'ended'
+    startTime === null ||
+    endTime === null
   ) {
-    return 'closed';
+    return "unknown";
   }
 
-  if (
-    backendStatus === 'pending' ||
-    backendStatus === 'scheduled' ||
-    backendStatus === 'upcoming'
-  ) {
-    return 'pending';
+  /*
+   * END ONLY when the actual end timestamp
+   * has passed.
+   */
+  if (now >= endTime) {
+    return "closed";
   }
 
-  return 'active';
+  /*
+   * UPCOMING when start time hasn't arrived.
+   */
+  if (now < startTime) {
+    return "pending";
+  }
+
+  /*
+   * Between start and end = LIVE.
+   */
+  return "active";
 }
 
 /**
- * Returns true only when an auction ended within the
- * specified number of hours.
+ * Returns true when auction ended within
+ * the specified number of hours.
  */
 export function isRecentlyEnded(
   auction,
   now = Date.now(),
   hours = 48
 ) {
-  const endTime = getTimeValue(auction?.end_time);
+  const endTime = getTimeValue(
+    auction?.end_time
+  );
 
-  if (endTime === null) return false;
+  if (endTime === null) {
+    return false;
+  }
 
-  const cutoff = now - hours * 60 * 60 * 1000;
+  const cutoff =
+    now - hours * 60 * 60 * 1000;
 
-  return endTime <= now && endTime >= cutoff;
+  return (
+    endTime <= now &&
+    endTime >= cutoff
+  );
 }
 
 /**
- * Returns true when an auction is currently live.
+ * Returns true when currently live.
  */
-export function isAuctionActive(auction, now = Date.now()) {
-  return getAuctionPhase(auction, now) === 'active';
+export function isAuctionActive(
+  auction,
+  now = Date.now()
+) {
+  return (
+    getAuctionPhase(auction, now) === "active"
+  );
 }
 
 /**
- * Returns true when an auction has ended.
+ * Returns true when ended.
  */
-export function isAuctionEnded(auction, now = Date.now()) {
-  return getAuctionPhase(auction, now) === 'closed';
+export function isAuctionEnded(
+  auction,
+  now = Date.now()
+) {
+  return (
+    getAuctionPhase(auction, now) === "closed"
+  );
 }
 
 /**
- * Returns true when an auction has not started yet.
+ * Returns true when not started yet.
  */
-export function isAuctionPending(auction, now = Date.now()) {
-  return getAuctionPhase(auction, now) === 'pending';
+export function isAuctionPending(
+  auction,
+  now = Date.now()
+) {
+  return (
+    getAuctionPhase(auction, now) === "pending"
+  );
 }
